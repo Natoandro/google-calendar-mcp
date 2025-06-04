@@ -11,7 +11,7 @@ export class CreateEventHandler extends BaseToolHandler {
         const validArgs = CreateEventArgumentsSchema.parse(args);
         const accessToken = validArgs.accessToken;
         delete (validArgs as any).accessToken;
-        const oauth2Client = await clientManager.getClient(accessToken);
+        const oauth2Client = clientManager.getClient(accessToken);
 
         const event = await this.createEvent(oauth2Client, validArgs);
 

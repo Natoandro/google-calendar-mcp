@@ -10,7 +10,7 @@ export class DeleteEventHandler extends BaseToolHandler {
         const validArgs = DeleteEventArgumentsSchema.parse(args);
         const accessToken = validArgs.accessToken;
         delete (validArgs as any).accessToken;
-        const oauth2Client = await clientManager.getClient(accessToken);
+        const oauth2Client = clientManager.getClient(accessToken);
         await this.deleteEvent(oauth2Client, validArgs);
         return {
             content: [{

@@ -12,7 +12,7 @@ export class SearchEventsHandler extends BaseToolHandler {
         const validArgs = SearchEventsArgumentsSchema.parse(args);
         const accessToken = validArgs.accessToken;
         delete (validArgs as any).accessToken;
-        const oauth2Client = await clientManager.getClient(accessToken);
+        const oauth2Client = clientManager.getClient(accessToken);
         const events = await this.searchEvents(oauth2Client, validArgs);
         return {
             content: [{

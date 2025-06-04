@@ -17,7 +17,7 @@ export class FreeBusyEventHandler extends BaseToolHandler {
 
     const accessToken = validArgs.data.accessToken;
     delete (validArgs.data as any).accessToken;
-    const oauth2Client = await clientManager.getClient(accessToken);
+    const oauth2Client = clientManager.getClient(accessToken);
 
     if (!this.isLessThanThreeMonths(validArgs.data.timeMin, validArgs.data.timeMax)) {
       return {

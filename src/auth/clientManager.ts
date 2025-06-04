@@ -10,12 +10,12 @@ export class ClientManager {
         this.clients = {};
     }
 
-    async getClient(accessToken: string): Promise<OAuth2Client> {
+    getClient(accessToken: string): OAuth2Client {
         const cachedClient = this.clients[accessToken];
         if (cachedClient) {
             return cachedClient;
         }
-        const client = await initializeOAuth2Client();
+        const client = initializeOAuth2Client();
         this.clients[accessToken] = client;
         client.setCredentials({
             access_token: accessToken,

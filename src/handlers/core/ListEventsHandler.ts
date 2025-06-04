@@ -20,7 +20,7 @@ export class ListEventsHandler extends BaseToolHandler {
         const validArgs = ListEventsArgumentsSchema.parse(args);
         const accessToken = validArgs.accessToken;
         delete (validArgs as any).accessToken;
-        const oauth2Client = await clientManager.getClient(accessToken);
+        const oauth2Client = clientManager.getClient(accessToken);
 
         // Normalize calendarId to always be an array for consistent processing
         const calendarIds = Array.isArray(validArgs.calendarId)

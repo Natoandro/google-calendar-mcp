@@ -10,7 +10,7 @@ export class ListColorsHandler extends BaseToolHandler {
         const validArgs = ListColorsArgumentsSchema.parse(args);
         const accessToken = validArgs.accessToken;
         delete (validArgs as any).accessToken;
-        const oauth2Client = await clientManager.getClient(accessToken);
+        const oauth2Client = clientManager.getClient(accessToken);
 
         const colors = await this.listColors(oauth2Client);
         return {
