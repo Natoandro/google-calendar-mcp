@@ -1,11 +1,12 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { OAuth2Client } from "google-auth-library";
 import { GaxiosError } from 'gaxios';
 import { calendar_v3, google } from "googleapis";
+import { ClientManager } from "../../auth/clientManager.js";
+import { OAuth2Client } from "google-auth-library";
 
 
 export abstract class BaseToolHandler {
-    abstract runTool(args: any, oauth2Client: OAuth2Client): Promise<CallToolResult>;
+    abstract runTool(args: any, clientManager: ClientManager): Promise<CallToolResult>;
 
     protected handleGoogleApiError(error: unknown): void {
         if (

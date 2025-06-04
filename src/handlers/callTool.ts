@@ -9,6 +9,7 @@ import { CreateEventHandler } from "./core/CreateEventHandler.js";
 import { UpdateEventHandler } from "./core/UpdateEventHandler.js";
 import { DeleteEventHandler } from "./core/DeleteEventHandler.js";
 import { FreeBusyEventHandler } from "./core/FreeBusyEventHandler.js";
+import { ClientManager } from "../auth/clientManager.js";
 
 /**
  * Handles incoming tool calls, validates arguments, calls the appropriate service,
@@ -18,12 +19,12 @@ import { FreeBusyEventHandler } from "./core/FreeBusyEventHandler.js";
  * @param oauth2Client The authenticated OAuth2 client instance.
  * @returns A Promise resolving to the CallToolResponse.
  */
-export async function handleCallTool(request: typeof CallToolRequestSchema._type, oauth2Client: OAuth2Client) {
+export async function handleCallTool(request: typeof CallToolRequestSchema._type, clientManager: ClientManager) {
     const { name, arguments: args } = request.params;
 
     try {
         const handler = getHandler(name);
-        return await handler.runTool(args, oauth2Client);
+        return await handler.runTool(args, clientManager);
     } catch (error: unknown) {
         console.error(`Error executing tool '${name}':`, error);
         // Re-throw the error to be handled by the main server logic or error handler

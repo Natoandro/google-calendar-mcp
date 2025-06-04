@@ -4,11 +4,17 @@ import { CreateEventArgumentsSchema } from "../../schemas/validators.js";
 import { BaseToolHandler } from "./BaseToolHandler.js";
 import { calendar_v3, google } from 'googleapis';
 import { z } from 'zod';
+import { ClientManager } from "../../auth/clientManager.js";
 
 export class CreateEventHandler extends BaseToolHandler {
-    async runTool(args: any, oauth2Client: OAuth2Client): Promise<CallToolResult> {
+    async runTool(args: any, clientManager: ClientManager): Promise<CallToolResult> {
         const validArgs = CreateEventArgumentsSchema.parse(args);
+        const accessToken = validArgs.accessToken;
+        delete (validArgs as any).accessToken;
+        const oauth2Client = await clientManager.getClient(accessToken);
+
         const event = await this.createEvent(oauth2Client, validArgs);
+
         return {
             content: [{
                 type: "text",

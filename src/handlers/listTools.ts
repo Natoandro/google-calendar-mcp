@@ -2,35 +2,35 @@ import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
 // Extracted reminder properties definition for reusability
 const remindersInputProperty = {
-    type: "object",
-    description: "Reminder settings for the event",
-    properties: {
-      useDefault: {
-        type: "boolean",
-        description: "Whether to use the default reminders",
-      },
-      overrides: {
-        type: "array",
-        description: "Custom reminders (uses popup notifications by default unless email is specified)",
-        items: {
-          type: "object",
-          properties: {
-            method: {
-              type: "string",
-              enum: ["email", "popup"],
-              description: "Reminder method (defaults to popup unless email is specified)",
-              default: "popup"
-            },
-            minutes: {
-              type: "number",
-              description: "Minutes before the event to trigger the reminder",
-            }
-          },
-          required: ["minutes"]
-        }
-      }
+  type: "object",
+  description: "Reminder settings for the event",
+  properties: {
+    useDefault: {
+      type: "boolean",
+      description: "Whether to use the default reminders",
     },
-    required: ["useDefault"]
+    overrides: {
+      type: "array",
+      description: "Custom reminders (uses popup notifications by default unless email is specified)",
+      items: {
+        type: "object",
+        properties: {
+          method: {
+            type: "string",
+            enum: ["email", "popup"],
+            description: "Reminder method (defaults to popup unless email is specified)",
+            default: "popup"
+          },
+          minutes: {
+            type: "number",
+            description: "Minutes before the event to trigger the reminder",
+          }
+        },
+        required: ["minutes"]
+      }
+    }
+  },
+  required: ["useDefault"]
 };
 
 export function getToolDefinitions() {
@@ -41,8 +41,13 @@ export function getToolDefinitions() {
         description: "List all available calendars",
         inputSchema: {
           type: "object",
-          properties: {}, // No arguments needed
-          required: [],
+          properties: {
+            accessToken: {
+              type: "string",
+              description: "Access token for the user",
+            },
+          },
+          required: ["accessToken"],
         },
       },
       {
@@ -51,6 +56,10 @@ export function getToolDefinitions() {
         inputSchema: {
           type: "object",
           properties: {
+            accessToken: {
+              type: "string",
+              description: "Access token for the user",
+            },
             calendarId: {
               oneOf: [
                 {
@@ -80,7 +89,7 @@ export function getToolDefinitions() {
               description: "End time in ISO format with timezone required (e.g., 2024-12-31T23:59:59Z or 2024-12-31T23:59:59+00:00). Date-time must end with Z (UTC) or +/-HH:MM offset.",
             },
           },
-          required: ["calendarId"],
+          required: ["accessToken", "calendarId"],
         },
       },
       {
@@ -89,6 +98,10 @@ export function getToolDefinitions() {
         inputSchema: {
           type: "object",
           properties: {
+            accessToken: {
+              type: "string",
+              description: "Access token for the user",
+            },
             calendarId: {
               type: "string",
               description: "ID of the calendar to search events in (use 'primary' for the main calendar)",
@@ -108,7 +121,7 @@ export function getToolDefinitions() {
               description: "End time boundary in ISO format with timezone required (e.g., 2024-12-31T23:59:59Z or 2024-12-31T23:59:59+00:00). Date-time must end with Z (UTC) or +/-HH:MM offset.",
             },
           },
-          required: ["calendarId", "query"],
+          required: ["accessToken", "calendarId", "query"],
         },
       },
       {
@@ -116,8 +129,13 @@ export function getToolDefinitions() {
         description: "List available color IDs and their meanings for calendar events",
         inputSchema: {
           type: "object",
-          properties: {}, // No arguments needed
-          required: [],
+          properties: {
+            accessToken: {
+              type: "string",
+              description: "Access token for the user",
+            },
+          },
+          required: ["accessToken"],
         },
       },
       {
@@ -126,6 +144,10 @@ export function getToolDefinitions() {
         inputSchema: {
           type: "object",
           properties: {
+            accessToken: {
+              type: "string",
+              description: "Access token for the user",
+            },
             calendarId: {
               type: "string",
               description: "ID of the calendar to create the event in (use 'primary' for the main calendar)",
@@ -186,7 +208,7 @@ export function getToolDefinitions() {
               }
             },
           },
-          required: ["calendarId", "summary", "start", "end", "timeZone"],
+          required: ["accessToken", "calendarId", "summary", "start", "end", "timeZone"],
         },
       },
       {
@@ -195,6 +217,10 @@ export function getToolDefinitions() {
         inputSchema: {
           type: "object",
           properties: {
+            accessToken: {
+              type: "string",
+              description: "Access token for the user",
+            },
             calendarId: {
               type: "string",
               description: "ID of the calendar containing the event",
@@ -250,8 +276,8 @@ export function getToolDefinitions() {
               },
             },
             reminders: {
-                ...remindersInputProperty,
-                description: "New reminder settings for the event (optional)",
+              ...remindersInputProperty,
+              description: "New reminder settings for the event (optional)",
             },
             recurrence: {
               type: "array",
@@ -273,31 +299,31 @@ export function getToolDefinitions() {
               description: "Required when modificationScope is 'single'. Original start time of the specific instance to modify in ISO format with timezone (e.g., 2024-08-15T10:00:00-07:00)."
             },
             futureStartDate: {
-              type: "string", 
+              type: "string",
               format: "date-time",
               description: "Required when modificationScope is 'future'. Start date for future modifications in ISO format with timezone (e.g., 2024-08-20T10:00:00-07:00). Must be a future date."
             }
           },
-          required: ["calendarId", "eventId", "timeZone"], // timeZone is technically required for PATCH
+          required: ["accessToken", "calendarId", "eventId", "timeZone"], // timeZone is technically required for PATCH
           allOf: [
             {
-              if: { 
-                properties: { 
-                  modificationScope: { const: "single" } 
-                } 
+              if: {
+                properties: {
+                  modificationScope: { const: "single" }
+                }
               },
-              then: { 
-                required: ["originalStartTime"] 
+              then: {
+                required: ["originalStartTime"]
               }
             },
             {
-              if: { 
-                properties: { 
-                  modificationScope: { const: "future" } 
-                } 
+              if: {
+                properties: {
+                  modificationScope: { const: "future" }
+                }
               },
-              then: { 
-                required: ["futureStartDate"] 
+              then: {
+                required: ["futureStartDate"]
               }
             }
           ]
@@ -309,6 +335,10 @@ export function getToolDefinitions() {
         inputSchema: {
           type: "object",
           properties: {
+            accessToken: {
+              type: "string",
+              description: "Access token for the user",
+            },
             calendarId: {
               type: "string",
               description: "ID of the calendar containing the event",
@@ -318,7 +348,7 @@ export function getToolDefinitions() {
               description: "ID of the event to delete",
             },
           },
-          required: ["calendarId", "eventId"],
+          required: ["accessToken", "calendarId", "eventId"],
         },
       },
       {
@@ -327,6 +357,10 @@ export function getToolDefinitions() {
         inputSchema: {
           type: "object",
           properties: {
+            accessToken: {
+              type: "string",
+              description: "Access token for the user",
+            },
             timeMin: {
               type: "string",
               description: "The start of the interval in RFC3339 format",
@@ -362,7 +396,7 @@ export function getToolDefinitions() {
               },
             },
           },
-          required: ["timeMin", "timeMax", "items"],
+          required: ["accessToken", "timeMin", "timeMax", "items"],
         },
       }
     ],

@@ -5,10 +5,14 @@ import { BaseToolHandler } from "./BaseToolHandler.js";
 import { calendar_v3 } from 'googleapis';
 import { z } from 'zod';
 import { formatEventList } from "../utils.js";
+import { ClientManager } from "../../auth/clientManager.js";
 
 export class SearchEventsHandler extends BaseToolHandler {
-    async runTool(args: any, oauth2Client: OAuth2Client): Promise<CallToolResult> {
+    async runTool(args: any, clientManager: ClientManager): Promise<CallToolResult> {
         const validArgs = SearchEventsArgumentsSchema.parse(args);
+        const accessToken = validArgs.accessToken;
+        delete (validArgs as any).accessToken;
+        const oauth2Client = await clientManager.getClient(accessToken);
         const events = await this.searchEvents(oauth2Client, validArgs);
         return {
             content: [{

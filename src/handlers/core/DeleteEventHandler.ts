@@ -3,10 +3,14 @@ import { OAuth2Client } from "google-auth-library";
 import { DeleteEventArgumentsSchema } from "../../schemas/validators.js";
 import { BaseToolHandler } from "./BaseToolHandler.js";
 import { z } from 'zod';
+import { ClientManager } from "../../auth/clientManager.js";
 
 export class DeleteEventHandler extends BaseToolHandler {
-    async runTool(args: any, oauth2Client: OAuth2Client): Promise<CallToolResult> {
+    async runTool(args: any, clientManager: ClientManager): Promise<CallToolResult> {
         const validArgs = DeleteEventArgumentsSchema.parse(args);
+        const accessToken = validArgs.accessToken;
+        delete (validArgs as any).accessToken;
+        const oauth2Client = await clientManager.getClient(accessToken);
         await this.deleteEvent(oauth2Client, validArgs);
         return {
             content: [{

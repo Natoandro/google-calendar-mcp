@@ -15,7 +15,12 @@ export const RemindersSchema = z.object({
 // ISO datetime regex that requires timezone designator (Z or +/-HH:MM)
 const isoDateTimeWithTimezone = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$/;
 
+export const ListCalendarsArgumentsSchema = z.object({
+  accessToken: z.string().min(1, "Access token is required"),
+});
+
 export const ListEventsArgumentsSchema = z.object({
+  accessToken: z.string().min(1, "Access token is required"),
   calendarId: z.preprocess(
     (val) => {
       // If it's a string that looks like JSON array, try to parse it
@@ -62,6 +67,7 @@ export const ListEventsArgumentsSchema = z.object({
 );
 
 export const SearchEventsArgumentsSchema = z.object({
+  accessToken: z.string().min(1, "Access token is required"),
   calendarId: z.string(),
   query: z.string(),
   timeMin: z.string()
@@ -73,6 +79,7 @@ export const SearchEventsArgumentsSchema = z.object({
 });
 
 export const CreateEventArgumentsSchema = z.object({
+  accessToken: z.string().min(1, "Access token is required"),
   calendarId: z.string(),
   summary: z.string(),
   description: z.string().optional(),
@@ -93,6 +100,7 @@ export const CreateEventArgumentsSchema = z.object({
 });
 
 export const UpdateEventArgumentsSchema = z.object({
+  accessToken: z.string().min(1, "Access token is required"),
   calendarId: z.string(),
   eventId: z.string(),
   summary: z.string().optional(),
@@ -164,11 +172,13 @@ export const UpdateEventArgumentsSchema = z.object({
 );
 
 export const DeleteEventArgumentsSchema = z.object({
+  accessToken: z.string().min(1, "Access token is required"),
   calendarId: z.string(),
   eventId: z.string(),
 });
 
 export const FreeBusyEventArgumentsSchema = z.object({
+  accessToken: z.string().min(1, "Access token is required"),
   timeMin: z.string()
     .regex(isoDateTimeWithTimezone, "Must be ISO format with timezone (e.g., 2024-01-01T00:00:00Z)"),
   timeMax: z.string()
@@ -179,4 +189,8 @@ export const FreeBusyEventArgumentsSchema = z.object({
   items: z.array(z.object({
     id: z.string().email("Must be a valid email address"),
   })),
+});
+
+export const ListColorsArgumentsSchema = z.object({
+  accessToken: z.string().min(1, "Access token is required"),
 });

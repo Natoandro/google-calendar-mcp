@@ -5,10 +5,14 @@ import { BaseToolHandler } from "./BaseToolHandler.js";
 import { calendar_v3 } from 'googleapis';
 import { z } from 'zod';
 import { RecurringEventHelpers, RecurringEventError, RECURRING_EVENT_ERRORS } from './RecurringEventHelpers.js';
+import { ClientManager } from "../../auth/clientManager.js";
 
 export class UpdateEventHandler extends BaseToolHandler {
-    async runTool(args: any, oauth2Client: OAuth2Client): Promise<CallToolResult> {
+    async runTool(args: any, clientManager: ClientManager): Promise<CallToolResult> {
         const validArgs = UpdateEventArgumentsSchema.parse(args);
+        const accessToken = validArgs.accessToken;
+        delete (validArgs as any).accessToken;
+        const oauth2Client = await clientManager.getClient(accessToken);
         const event = await this.updateEventWithScope(oauth2Client, validArgs);
         return {
             content: [{
@@ -25,17 +29,17 @@ export class UpdateEventHandler extends BaseToolHandler {
         try {
             const calendar = this.getCalendar(client);
             const helpers = new RecurringEventHelpers(calendar);
-            
+
             // Detect event type and validate scope usage
             const eventType = await helpers.detectEventType(args.eventId, args.calendarId);
-            
+
             if (args.modificationScope !== 'all' && eventType !== 'recurring') {
                 throw new RecurringEventError(
                     'Scope other than "all" only applies to recurring events',
                     RECURRING_EVENT_ERRORS.NON_RECURRING_SCOPE
                 );
             }
-            
+
             switch (args.modificationScope) {
                 case 'single':
                     return this.updateSingleInstance(helpers, args);
@@ -70,7 +74,7 @@ export class UpdateEventHandler extends BaseToolHandler {
 
         const calendar = helpers.getCalendar();
         const instanceId = helpers.formatInstanceId(args.eventId, args.originalStartTime);
-        
+
         const response = await calendar.events.patch({
             calendarId: args.calendarId,
             eventId: instanceId,
@@ -86,7 +90,7 @@ export class UpdateEventHandler extends BaseToolHandler {
         args: z.infer<typeof UpdateEventArgumentsSchema>
     ): Promise<calendar_v3.Schema$Event> {
         const calendar = helpers.getCalendar();
-        
+
         const response = await calendar.events.patch({
             calendarId: args.calendarId,
             eventId: args.eventId,
@@ -133,7 +137,7 @@ export class UpdateEventHandler extends BaseToolHandler {
 
         // 3. Create new recurring event starting from future date
         const requestBody = helpers.buildUpdateRequestBody(args);
-        
+
         // Calculate end time if start time is changing
         let endTime = args.end;
         if (args.start || args.futureStartDate) {
@@ -144,13 +148,13 @@ export class UpdateEventHandler extends BaseToolHandler {
         const newEvent = {
             ...helpers.cleanEventForDuplication(originalEvent),
             ...requestBody,
-            start: { 
-                dateTime: args.start || args.futureStartDate, 
-                timeZone: args.timeZone 
+            start: {
+                dateTime: args.start || args.futureStartDate,
+                timeZone: args.timeZone
             },
-            end: { 
-                dateTime: endTime, 
-                timeZone: args.timeZone 
+            end: {
+                dateTime: endTime,
+                timeZone: args.timeZone
             }
         };
 

@@ -4,18 +4,22 @@ import { OAuth2Client } from "google-auth-library";
 import { FreeBusyEventArgumentsSchema } from "../../schemas/validators.js";
 import { z } from "zod";
 import { FreeBusyResponse } from '../../schemas/types.js';
+import { ClientManager } from "../../auth/clientManager.js";
 
 export class FreeBusyEventHandler extends BaseToolHandler {
-  async runTool(args: any, oauth2Client: OAuth2Client): Promise<CallToolResult> {
-
+  async runTool(args: any, clientManager: ClientManager): Promise<CallToolResult> {
     const validArgs = FreeBusyEventArgumentsSchema.safeParse(args);
     if (!validArgs.success) {
       throw new Error(
-          `Invalid arguments Error: ${JSON.stringify(validArgs.error.issues)}`
+        `Invalid arguments Error: ${JSON.stringify(validArgs.error.issues)}`
       );
     }
 
-    if(!this.isLessThanThreeMonths(validArgs.data.timeMin,validArgs.data.timeMax)){
+    const accessToken = validArgs.data.accessToken;
+    delete (validArgs.data as any).accessToken;
+    const oauth2Client = await clientManager.getClient(accessToken);
+
+    if (!this.isLessThanThreeMonths(validArgs.data.timeMin, validArgs.data.timeMax)) {
       return {
         content: [{
           type: "text",
@@ -57,7 +61,7 @@ export class FreeBusyEventHandler extends BaseToolHandler {
     }
   }
 
-  private isLessThanThreeMonths (timeMin: string, timeMax: string): boolean {
+  private isLessThanThreeMonths(timeMin: string, timeMax: string): boolean {
     const minDate = new Date(timeMin);
     const maxDate = new Date(timeMax);
 
