@@ -8,7 +8,6 @@ import { OAuth2Client } from "google-auth-library";
 import { fileURLToPath } from "url";
 
 // Import modular components
-import { initializeOAuth2Client } from './auth/client.js';
 import { getToolDefinitions } from './handlers/listTools.js';
 import { handleCallTool } from './handlers/callTool.js';
 import { ClientManager } from "./auth/clientManager.js";
@@ -43,7 +42,19 @@ async function main() {
     // Call Tool Handler
     server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // Delegate the actual tool execution to the specialized handler
-      return handleCallTool(request, clientManager);
+      try {
+        return await handleCallTool(request, clientManager);
+      } catch (e: unknown) {
+        return {
+          // isError: true,
+          content: [
+            {
+              type: "text",
+              text: `Error: ${e instanceof Error ? e.message : String(e)}`,
+            },
+          ]
+        };
+      }
     });
 
     // 4. Connect Server Transport
